@@ -1,4 +1,4 @@
--- Active: 1749956386295@@127.0.0.1@3306@pizzadb
+-- Active: 1750334019546@@127.0.0.1@3307@pizzadb
 CREATE TABLE cliente(
     id_cliente INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -317,3 +317,35 @@ SHOW CREATE TRIGGER trg_validar_stock_detalle_producto\G
 --Insertar datos de ejemplo
 INSERT INTO ingredientes_extra (cantidad, detalle_pedido_id, ingrediente_id)
 VALUES (20, 1, 2);
+
+
+--1. Descontar stock tras agregar ingredientes extra (Trigger `AFTER INSERT`).
+
+DELIMITER //
+
+CREATE TRIGGER trg_descuento_stock_ingrediente_extra
+AFTER INSERT ON ingredientes_extra
+FOR EACH ROW
+BEGIN
+    -- Actualizar el stock del ingrediente
+    UPDATE ingrediente
+    SET stock = stock - NEW.cantidad
+    WHERE id_ingrediente = NEW.ingrediente_id;
+    
+    -- Verificar si el stock es negativo
+    IF (SELECT stock FROM ingrediente WHERE id_ingrediente = NEW.ingrediente_id) < 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Stock insuficiente tras agregar ingrediente extra';
+    END IF;
+END //
+
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS trg_descuento_stock_ingrediente_extra;
+
+-- Verificar si el trigger fue creado correctamente
+SHOW TRIGGERS LIKE 'trg_descuento_stock_ingrediente_extra';
+
+-- Verificar la creación del trigger
+SHOW CREATE TRIGGER trg_descuento_stock_ingrediente_extra\G
+

@@ -1,4 +1,4 @@
--- Active: 1749956386295@@127.0.0.1@3306@pizzadb
+-- Active: 1750334019546@@127.0.0.1@3307@pizzadb
 INSERT INTO cliente (nombre, telefono, direccion) VALUES
 ('Juan Perez', '987654321', 'Av. Siempre Viva 123'),
 ('Maria Lopez', '912345678', 'Calle Falsa 456'),
