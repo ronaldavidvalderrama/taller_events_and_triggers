@@ -280,3 +280,40 @@ SHOW EVENTS LIKE 'ev_purgar_resumen_antiguo';
 
 -- Verificar la creación del evento
 SHOW CREATE EVENT ev_purgar_resumen_antiguo\G
+
+
+
+-- TRIGGERS
+
+--Validar stock antes de agregar detalle de producto (Trigger `BEFORE INSERT`).
+
+DELIMITER //
+
+CREATE TRIGGER trg_validar_stock_detalle_producto
+BEFORE INSERT ON ingredientes_extra
+FOR EACH ROW
+BEGIN
+    DECLARE stock_actual INT;
+
+    -- Obtener el stock actual del producto
+    SELECT stock INTO stock_actual
+    FROM ingrediente
+    WHERE id_ingrediente = NEW.ingrediente_id;
+    -- Verificar si el stock es suficiente
+    IF stock_actual < NEW.cantidad THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Stock insuficiente para el producto';
+    END IF;
+END //
+
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS trg_validar_stock_detalle_producto;
+-- Verificar si el trigger fue creado correctamente
+SHOW TRIGGERS LIKE 'trg_validar_stock_detalle_producto';
+-- Verificar la creación del trigger
+SHOW CREATE TRIGGER trg_validar_stock_detalle_producto\G
+
+--Insertar datos de ejemplo
+INSERT INTO ingredientes_extra (cantidad, detalle_pedido_id, ingrediente_id)
+VALUES (20, 1, 2);
