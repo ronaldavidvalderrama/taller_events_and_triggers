@@ -256,3 +256,27 @@ SHOW EVENTS LIKE 'ev_monitor_stock_bajo';
 
 -- Verificar la creación del evento
 SHOW CREATE EVENT ev_monitor_stock_bajo\G
+
+-- Limpieza de Resúmenes Antiguos: una sola vez, eliminar de `resumen_ventas`
+-- los registros con fecha anterior a hace 365 días y luego
+-- borrar el evento llamado `ev_purgar_resumen_antiguo`.
+
+DELIMITER //
+CREATE EVENT ev_purgar_resumen_antiguo
+ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 MINUTE
+DO 
+BEGIN
+    DELETE FROM resumen_ventas
+    WHERE fecha < CURDATE() - INTERVAL 365 DAY;
+END //
+
+DELIMITER ;
+
+DROP EVENT IF EXISTS ev_purgar_resumen_antiguo;
+
+-- Verificar si el evento fue creado correctamente
+
+SHOW EVENTS LIKE 'ev_purgar_resumen_antiguo';
+
+-- Verificar la creación del evento
+SHOW CREATE EVENT ev_purgar_resumen_antiguo\G
