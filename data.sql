@@ -49,6 +49,10 @@ INSERT INTO ingrediente (nombre, stock, precio) VALUES
 ('Jamón', 50, 1500),
 ('Champiñones', 70, 1200);
 
+UPDATE ingrediente
+SET stock = 4
+WHERE id_ingrediente = 2;
+
 
 -- TABLA PRODUCTO
 INSERT INTO producto (nombre, id_tipo_producto) VALUES
